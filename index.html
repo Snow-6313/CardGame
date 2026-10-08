@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en" data-theme="halloween">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="A little focus. A little fun. A beautifully simple memory-card game with six themes and a personal leaderboard.">
+  <meta name="theme-color" content="#f8f5ef">
+  <title>Match — a little memory game</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23ae4927'/%3E%3Cpath d='M11 27V13l9 9 9-9v14' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/engine.js" defer></script>
+  <script src="js/game.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#game-board">Skip to cards</a>
+  <div class="app-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="Match home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 23V9l8 8 8-8v14"/></svg></span>
+        <span>match<span class="brand-dot">.</span></span>
+      </a>
+      <div class="header-actions">
+        <label class="theme-control" for="theme-select"><span class="theme-icon" aria-hidden="true">◐</span><span class="sr-only">Color theme</span><select id="theme-select"></select></label>
+        <button class="button button-quiet leaderboard-trigger" id="leaderboard-open" type="button" aria-label="Leaderboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Zm0 2H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4m-4 1v6m-4 1h8"/></svg><span>Leaderboard</span></button>
+      </div>
+    </header>
+
+    <main>
+      <section class="game-intro" aria-labelledby="game-title">
+        <span class="eyebrow"><span class="season-dot" aria-hidden="true"></span><span id="theme-edition">THE HALLOWEEN EDITION</span></span>
+        <h1 id="game-title">Small cards. <span>Sharp mind.</span></h1>
+        <p>Flip a little. Focus a little. Find your perfect match.</p>
+      </section>
+
+      <section class="game" aria-label="Memory card game">
+        <div class="game-toolbar">
+          <fieldset class="difficulty-control"><legend class="sr-only">Difficulty (starts a new game)</legend><div id="difficulty-options" class="segmented-control"></div></fieldset>
+          <div class="toolbar-actions">
+            <button id="camera-lock-toggle" class="button button-quiet camera-lock-toggle" type="button" aria-pressed="false">Camera lock: Off</button>
+            <button id="new-game" class="button button-primary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg>New game</button>
+          </div>
+        </div>
+
+        <div class="stats" aria-label="Game statistics">
+          <div class="stat"><span class="stat-label">MOVES</span><strong id="moves">0</strong></div>
+          <div class="stat"><span class="stat-label">TIME</span><strong id="timer">00:00</strong></div>
+          <div class="stat"><span class="stat-label">SCORE</span><strong id="score">0</strong></div>
+          <div class="stat"><span class="stat-label">MATCHED</span><strong><span id="matched">0</span><span class="stat-total" id="pair-total"> / 6</span></strong></div>
+        </div>
+
+        <div class="board-heading"><span id="board-caption">12 cards. 6 little discoveries.</span><span class="progress-label"><span class="progress-dot" aria-hidden="true"></span><span id="game-status">Ready when you are</span></span></div>
+        <div id="game-board" class="card-grid" tabindex="-1" role="group" aria-label="Memory cards"></div>
+        <div class="board-footer"><span id="board-hint">Pick any two cards to find a pair.</span><div class="board-actions"><button id="result-open" class="text-button" type="button" hidden>View result ↗</button><button id="help-open" class="text-button" type="button"><span aria-hidden="true">ⓘ</span> How to play</button></div></div>
+        <p id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+        <p id="storage-notice" class="storage-notice" role="status" hidden></p>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>A little pause. A sharper mind.</span><span>No rush. Just one more pair.</span></footer>
+  </div>
+
+  <dialog id="completion-dialog" class="modal completion-modal" aria-labelledby="completion-title">
+    <button class="icon-button dialog-close" type="button" data-close aria-label="Close results">✕</button>
+    <div class="completion-icon" aria-hidden="true">✧</div>
+    <span class="eyebrow">ALL PAIRS, ALL YOURS</span>
+    <h2 id="completion-title">Nicely matched.</h2>
+    <p class="modal-description" id="completion-description"></p>
+    <div class="result-stats"><div><span>Score</span><strong id="final-score"></strong></div><div><span>Moves</span><strong id="final-moves"></strong></div><div><span>Time</span><strong id="final-time"></strong></div></div>
+    <form id="score-form">
+      <label for="player-name">Put a name to that score</label>
+      <div class="name-entry"><input id="player-name" name="playerName" type="text" maxlength="24" required placeholder="Your name" autocomplete="nickname"><button id="save-score" class="button button-primary" type="submit">Save score</button></div>
+      <p id="save-feedback" class="form-feedback" role="status"></p>
+    </form>
+    <button id="play-again" type="button" class="button button-outline full-width">Play again <span aria-hidden="true">↗</span></button>
+  </dialog>
+
+  <dialog id="leaderboard-dialog" class="modal leaderboard-modal" aria-labelledby="leaderboard-title">
+    <div class="modal-heading"><div><span class="eyebrow">YOUR PERSONAL BESTS</span><h2 id="leaderboard-title">The leaderboard.</h2></div><button class="icon-button" type="button" data-close aria-label="Close leaderboard">✕</button></div>
+    <p class="modal-description">A little friendly competition. Saved on this device.</p>
+    <div class="leaderboard-controls"><div id="leaderboard-filters" class="segmented-control" role="group" aria-label="Filter scores by difficulty"></div><label class="sort-control" for="leaderboard-sort">Sort by<select id="leaderboard-sort"></select></label></div>
+    <div class="leaderboard-actions"><button id="clear-leaderboard" class="button button-quiet" type="button">Clear leaderboard</button></div>
+    <div class="table-scroll" role="region" aria-label="Leaderboard scores" tabindex="0"><table><caption class="sr-only">Personal game results</caption><thead><tr><th scope="col">#</th><th scope="col">Player</th><th scope="col">Level</th><th scope="col">Score</th><th scope="col">Moves</th><th scope="col">Time</th></tr></thead><tbody id="leaderboard-body"></tbody></table></div>
+    <div id="leaderboard-empty" class="empty-state"><span aria-hidden="true">✧</span><h3>A fresh start.</h3><p>Finish a game and save your score.<br>Your next personal best starts here.</p></div>
+    <p class="leaderboard-note">Higher scores win. A few less moves make all the difference.</p>
+  </dialog>
+
+  <dialog id="help-dialog" class="modal help-modal" aria-labelledby="help-title">
+    <div class="modal-heading"><div><span class="eyebrow">A MOMENT TO REFOCUS</span><h2 id="help-title">Simple by design.</h2></div><button class="icon-button" type="button" data-close aria-label="Close instructions">✕</button></div>
+    <ol class="instructions"><li><strong>Flip two cards.</strong><span>Choose with a tap, a click, or Tab and Enter / Space.</span></li><li><strong>Find their other half.</strong><span>Matching pairs stay face up. Not a match? Remember them for next time.</span></li><li><strong>Make every move count.</strong><span>Clear the board in fewer moves and less time to earn more points.</span></li></ol>
+    <details><summary>How scoring works</summary><p id="scoring-explanation"></p></details>
+    <p class="help-note">The timer starts with your first card and keeps running while this page is open, including in other tabs or dialogs. Changing difficulty starts a fresh board; changing theme keeps your progress.</p>
+    <button class="button button-primary full-width" type="button" data-close>Got it. Let's match.</button>
+  </dialog>
+  <noscript><p class="noscript-notice">Please enable JavaScript to play Match.</p></noscript>
+</body>
+</html>
